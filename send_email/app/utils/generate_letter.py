@@ -2,7 +2,7 @@ from docx import Document
 import os
 
 def generate_offer_letter(name, role, amount, start_date, location):
-    doc = Document("offer_template.docx")
+    doc = Document("send_email/templates/offer_template.docx")
     for para in doc.paragraphs:
         para.text = para.text.replace("{{NAME}}", name)
         para.text = para.text.replace("{{ROLE}}", role)
@@ -15,3 +15,4 @@ def generate_offer_letter(name, role, amount, start_date, location):
     file_path = os.path.join(output_dir, f"{name}_offer_letter.docx")
     doc.save(file_path)
     return file_path
+

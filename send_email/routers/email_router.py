@@ -1,34 +1,29 @@
-from fastapi import FastAPI
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import pandas as pd
 import json
-import os
 import asyncio
 from kafka import KafkaProducer
+import os
 from dotenv import load_dotenv
+from functools import partial
 
 load_dotenv()
 
-app = FastAPI()
-
-
+router = APIRouter()
 
 producer = KafkaProducer(
     bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092"),
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
-'''
-producer = KafkaProducer(
-    bootstrap_servers="localhost:9092",  
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
-)
-'''
-
 
 def load_email_list():
-    df = pd.read_excel("email_list.xlsx")
+    df = pd.read_excel("send_email/app/email_list.xlsx")
     return df.to_dict(orient="records")
 
+
+def send_to_kafka(topic, payload):
+    producer.send(topic, value=payload)
 
 
 async def send_email_message(person):
@@ -55,23 +50,23 @@ HR Team
         "Offer_amount": person["Offer_amount"],
         "Starting_date": person["Starting_date"],
         "Location": person["Location"],
-        "has_passed": person.get("has_passed", "no") ,
+        "has_passed": person.get("has_passed", "no"),
         "message": personalized_message
     }
-    print("inside send email messsage")
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, lambda: producer.send("offer_topic", value=payload))
+    await asyncio.get_running_loop().run_in_executor(None, lambda: producer.send("offer_topic", value=payload))  #(gives error)
+
+    #producer.send("offer_topic", value=payload)
 
 
-@app.post("/send-emails")
+    # loop = asyncio.get_running_loop()
+    # await loop.run_in_executor(None, send_to_kafka, "offer_topic", payload)
+   
+
+@router.post("/send-emails")
 async def send_bulk_emails():
     email_list = load_email_list()
-
-    # Create tasks for all emails
     tasks = [send_email_message(person) for person in email_list]
     await asyncio.gather(*tasks)
-
-    # Flush Kafka producer after sending all
     producer.flush()
-
     return JSONResponse({"status": "Emails queued successfully"})
+

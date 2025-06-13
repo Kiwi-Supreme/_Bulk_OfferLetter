@@ -7,3 +7,4 @@ python-docx
 kafka-python
 jinja2
 openpyxl
+aiofiles
