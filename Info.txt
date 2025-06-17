@@ -1,0 +1,53 @@
+Info:
+
+==================================================================================================================
+
+Create a database:
+pgAdmin 4  server database create database name for the database(LOLO) 
+
+LOLO Query tools code for table creation run the code Table is created
+Code for the table:
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    user_input TEXT NOT NULL,
+    system_output TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+LOLO Query tools SELECT * FROM messages; run the code
+
+
+clear the database:    TRUNCATE TABLE users RESTART IDENTITY CASCADE;
+------------------------------------------------------------------------------------------------------------------
+GITHUB:
+
+git init
+git add .
+git commit -am "initial commit"
+git remote add origin https://github.com/Kiwi-Supreme/Bulk-email-sender
+git remote -v
+(clear)
+git push origin main
+
+at the end: 
+Remove-Item -Recurse -Force .git
+(This deletes all Git tracking info, including previous commits, remote URLs, etc.)
+
+
+
+
+To make changes to your own code:
+git init
+git clone <url>
+----make the needed changes---
+git add .
+git commit -m "Your commit message"
+git push origin main
+
+==================================================================================================================
+
+docker-compose up --build -d
+
+python consumer.py
+
+uvicorn main:app --reload 
