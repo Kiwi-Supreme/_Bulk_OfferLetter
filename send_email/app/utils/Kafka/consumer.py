@@ -1,10 +1,15 @@
 from kafka import KafkaConsumer
 import json
 import asyncio
-from send_email.app.send_email import send_email
-from send_email.app.utils.generate_letter import generate_offer_letter
 import os
 from dotenv import load_dotenv
+import sys
+
+# Add project root to Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../..')))
+
+from send_email.app.send_email import send_email
+from send_email.app.utils.generate_letter import generate_offer_letter
 
 load_dotenv()
 
@@ -24,7 +29,7 @@ async def process(data):
     subject = "Your Offer Letter"
     message = f"Dear {name},\n\nWe are delighted to have you on board. Attached below is your offer letter.\n\nRegards,\nHR Team"
 
-    if data.get("has_passed", "no") == "yes":
+    if data["has_passed"] == "yes":
         doc_path = generate_offer_letter(name, role, amount, start_date, location)
         success = await send_email(email, subject, message, doc_path)
         if success:

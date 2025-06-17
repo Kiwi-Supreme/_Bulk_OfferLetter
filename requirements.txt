@@ -1,10 +1,8 @@
 fastapi
+uvicorn
+kafka-python
 aiosmtplib
 python-dotenv
-uvicorn
 pandas
-python-docx
-kafka-python
-jinja2
 openpyxl
-aiofiles
+python-docx

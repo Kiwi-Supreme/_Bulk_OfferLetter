@@ -1,7 +1,7 @@
 Project/
 ├── send_email/ 
 |   ├── main.py 
-|   ├── router/
+|   ├── routers/
 |   |   ├── email_router.py  
 |   ├──templates/
 |   |   ├── offer_template.docx          
@@ -72,12 +72,13 @@ Reliability: If the consumer is down, Kafka retains messages.
 
 Role of Kafka in This Project
 
-Feature	Kafka’s   |     Role
+Feature	Kafka’s        |    Role
 ------------------------------------------------------------------------------------------
 Buffering	       |    Temporarily stores all messages until the consumer is ready
 Decoupling	       |    FastAPI only produces messages — it doesn’t send emails directly
 Scalability	       |    You can add more consumers to handle high email volume
 Reliability	       |    Kafka ensures messages aren't lost (configurable retention)
-Asynchronous flow  |    Enables non-blocking, background processing of email logic
+Asynchronous flow      |    Enables non-blocking, background processing of email logic
+--------------------------------------------------------------------------------------------------------
 
 

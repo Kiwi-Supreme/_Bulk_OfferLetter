@@ -3,6 +3,7 @@ import aiosmtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 async def send_email(recipient: str, subject: str, message: str, attachment_path: str = None) -> bool:

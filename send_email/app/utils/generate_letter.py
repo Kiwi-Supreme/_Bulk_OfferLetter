@@ -10,9 +10,8 @@ def generate_offer_letter(name, role, amount, start_date, location):
         para.text = para.text.replace("{{DATE}}", start_date)
         para.text = para.text.replace("{{LOCATION}}", location)
 
-    output_dir = "offers"
+    output_dir = "send_email/offers"
     os.makedirs(output_dir, exist_ok=True)
     file_path = os.path.join(output_dir, f"{name}_offer_letter.docx")
     doc.save(file_path)
     return file_path
-

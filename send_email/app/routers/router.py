@@ -2,28 +2,44 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 import pandas as pd
 import json
+import os
 import asyncio
 from kafka import KafkaProducer
-import os
 from dotenv import load_dotenv
-from functools import partial
 
 load_dotenv()
 
 router = APIRouter()
 
-producer = KafkaProducer(
-    bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092"),
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
-)
+producer = None
+
+@router.on_event("startup")
+async def startup_event():
+    global producer
+    for i in range(10):
+        try:
+            print(f"Kafka bootstrap servers: {os.getenv('KAFKA_BOOTSTRAP_SERVERS')}")
+            producer = KafkaProducer(
+                bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+                value_serializer=lambda v: json.dumps(v).encode("utf-8")
+            )
+            print("Kafka Producer initialized.")
+            break
+        except Exception as e:
+            print(f"Kafka not ready yet, retrying in 5 seconds... ({i+1}/10) — {e}")
+            await asyncio.sleep(5)
+    else:
+        raise Exception("Kafka is not available after multiple retries.")
+
+
+@router.get("/")
+def read_root():
+    return {"status": "FastAPI is running"}
+
 
 def load_email_list():
     df = pd.read_excel("send_email/app/email_list.xlsx")
     return df.to_dict(orient="records")
-
-
-def send_to_kafka(topic, payload):
-    producer.send(topic, value=payload)
 
 
 async def send_email_message(person):
@@ -42,7 +58,6 @@ Location: {person['Location']}
 Regards,
 HR Team
 """
-
     payload = {
         "Email": person["Email"],
         "Name": person["Name"],
@@ -53,14 +68,11 @@ HR Team
         "has_passed": person.get("has_passed", "no"),
         "message": personalized_message
     }
-    await asyncio.get_running_loop().run_in_executor(None, lambda: producer.send("offer_topic", value=payload))  #(gives error)
 
-    #producer.send("offer_topic", value=payload)
+    print(f"Queuing message for: {person['Email']}")
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, lambda: producer.send("offer_topic", value=payload))
 
-
-    # loop = asyncio.get_running_loop()
-    # await loop.run_in_executor(None, send_to_kafka, "offer_topic", payload)
-   
 
 @router.post("/send-emails")
 async def send_bulk_emails():
@@ -69,4 +81,3 @@ async def send_bulk_emails():
     await asyncio.gather(*tasks)
     producer.flush()
     return JSONResponse({"status": "Emails queued successfully"})
-
