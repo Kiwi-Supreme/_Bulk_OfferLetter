@@ -1,0 +1,84 @@
+Project/
+├── send_email/ 
+|   ├── main.py 
+|   ├── routers/
+|   |   ├── email_router.py  
+|   ├──templates/
+|   |   ├── offer_template.docx          
+│   └── app/ 
+│       ├── send_email.py 
+|       ├── email_list.xlsx             
+│       └── utils/
+│           ├── generate_letter.py
+│           └── Kafka/
+│               ├── consumer.py
+│               └── producer.py   
+|
+├── .env                        
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+
+--------------------------------------------------------------------------------------------------------
+
+========================================================================================================
+
+if facing the error: Error response from daemon: Conflict. The container name "/kafka-consumer" is already in use by container "d058ea0b4e943cf9759ac318f271ac7f961ff4ac7d5d4233a2ce21f323db4948". You have to remove (or rename) that container to be able to reuse that name.
+
+You can remove the existing container with:  docker rm -f kafka-consumer
+
+========================================================================================================
+
+Then run: docker-compose up --build
+
+and on browser run: http://127.0.0.1:8000/docs
+
+In VS code terminal: uvicorn send_email.main:app --reload
+
+
+docker-compose up --build -d
+docker-compose down --volumes --remove-orphans
+========================================================================================================
+
+Kafka queues the messages
+
+Kafka acts as a message broker (middleman).
+It stores the messages under the topic offer_topic.
+
+Kafka ensures:
+Decoupling: FastAPI doesn’t send emails directly.
+Scalability: Many consumers can handle load.
+Reliability: If the consumer is down, Kafka retains messages.
+========================================================================================================
+
+                                             Excel (.xlsx)
+                                                │
+                                                ▼
+                                             FastAPI app (/send-emails)
+                                                │
+                                                ▼
+                                             Kafka Producer (send message to "offer_topic")
+                                                │
+                                                ▼
+                                             Kafka Topic (buffered message queue)
+                                                │
+                                                ▼
+                                             Kafka Consumer
+                                                │
+                                                ▼
+                                             Email Sent to Candidate 
+
+========================================================================================================
+
+Role of Kafka in This Project
+
+Feature	Kafka’s        |    Role
+------------------------------------------------------------------------------------------
+Buffering	       |    Temporarily stores all messages until the consumer is ready
+Decoupling	       |    FastAPI only produces messages — it doesn’t send emails directly
+Scalability	       |    You can add more consumers to handle high email volume
+Reliability	       |    Kafka ensures messages aren't lost (configurable retention)
+Asynchronous flow      |    Enables non-blocking, background processing of email logic
+--------------------------------------------------------------------------------------------------------
+
+

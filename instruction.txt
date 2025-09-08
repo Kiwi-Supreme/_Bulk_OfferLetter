@@ -1,0 +1,11 @@
+How to run the code:
+
+-docker-compose up --build -d
+
+-to run the consumer.py:
+set PYTHONPATH=.
+python send_email/app/utils/Kafka/consumer.py
+
+-uvicorn send_email.main:app --reload
+
+-http://localhost:8000/docs
